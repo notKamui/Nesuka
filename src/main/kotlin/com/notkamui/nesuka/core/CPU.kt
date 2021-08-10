@@ -2,12 +2,9 @@ package com.notkamui.nesuka.core
 
 class CPU {
     var registerA: UByte = 0u
-        private set
-
+    var registerX: UByte = 0u
     var status: UByte = 0u
-        private set
-
-    private var programCounter: UShort = 0u
+    var programCounter: UShort = 0u
 
     fun interpret(program: List<UByte>) {
         programCounter = 0u
@@ -18,9 +15,27 @@ class CPU {
 
             when (opcode) {
                 0xA9u.toUByte() -> lda(program[programCounter.toInt()])
+                0xAAu.toUByte() -> tax()
                 0x00u.toUByte() -> return // brk
                 else -> TODO()
             }
+        }
+    }
+
+    /**
+     * Sets the zero and negative flags according to a given register status
+     */
+    private fun setZeroNegFlags(register: UByte) {
+        status = if (register == 0u.toUByte()) {
+            status or 0b0000_0010u
+        } else {
+            status and 0b1111_1101u
+        }
+
+        status = if (register and 0b1000_0000u != 0u.toUByte()) {
+            status or 0b1000_0000u
+        } else {
+            status and 0b0111_1111u
         }
     }
 
@@ -35,17 +50,18 @@ class CPU {
     private fun lda(param: UByte) {
         programCounter++
         registerA = param
+        setZeroNegFlags(registerA)
+    }
 
-        status = if (registerA == 0u.toUByte()) {
-            status or 0b0000_0010u
-        } else {
-            status and 0b1111_1101u
-        }
-
-        status = if (registerA and 0b1000_0000u != 0u.toUByte()) {
-            status or 0b1000_0000u
-        } else {
-            status and 0b0111_1111u
-        }
+    /**
+     * 0xAA ; Transfer Accumulator to X
+     *
+     * Copies the current contents of the accumulator
+     * into the X register and sets the zero and negative
+     * flags as appropriate.
+     */
+    private fun tax() {
+        registerX = registerA
+        setZeroNegFlags(registerX)
     }
 }
