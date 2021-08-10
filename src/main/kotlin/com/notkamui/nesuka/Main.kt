@@ -7,7 +7,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.Stage
 
-class HelloApplication : Application() {
+class Main : Application() {
     override fun start(stage: Stage) {
         val canvas = Canvas(320.0, 320.0)
         val gc = canvas.graphicsContext2D
@@ -21,5 +21,5 @@ class HelloApplication : Application() {
 }
 
 fun main() {
-    Application.launch(HelloApplication::class.java)
+    Application.launch(Main::class.java)
 }
