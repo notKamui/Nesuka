@@ -6,6 +6,9 @@ class CPU {
     var status: UByte = 0u
     var programCounter: UShort = 0u
 
+    /**
+     * Interprets a [program] (which is a list of [UByte]s and runs it
+     */
     fun interpret(program: List<UByte>) {
         programCounter = 0u
 
@@ -14,7 +17,10 @@ class CPU {
             programCounter++
 
             when (opcode) {
-                0xA9u.toUByte() -> lda(program[programCounter.toInt()])
+                0xA9u.toUByte() -> {
+                    programCounter++
+                    lda(program[programCounter.toInt()])
+                }
                 0xAAu.toUByte() -> tax()
                 0x00u.toUByte() -> return // brk
                 else -> TODO()
@@ -25,14 +31,14 @@ class CPU {
     /**
      * Sets the zero and negative flags according to a given register status
      */
-    private fun setZeroNegFlags(register: UByte) {
-        status = if (register == 0u.toUByte()) {
+    private fun updateZeroNegFlags(value: UByte) {
+        status = if (value == 0u.toUByte()) {
             status or 0b0000_0010u
         } else {
             status and 0b1111_1101u
         }
 
-        status = if (register and 0b1000_0000u != 0u.toUByte()) {
+        status = if (value and 0b1000_0000u != 0u.toUByte()) {
             status or 0b1000_0000u
         } else {
             status and 0b0111_1111u
@@ -48,9 +54,8 @@ class CPU {
      * setting the zero and negative flags as appropriate.
      */
     private fun lda(param: UByte) {
-        programCounter++
         registerA = param
-        setZeroNegFlags(registerA)
+        updateZeroNegFlags(registerA)
     }
 
     /**
@@ -62,6 +67,6 @@ class CPU {
      */
     private fun tax() {
         registerX = registerA
-        setZeroNegFlags(registerX)
+        updateZeroNegFlags(registerX)
     }
 }
