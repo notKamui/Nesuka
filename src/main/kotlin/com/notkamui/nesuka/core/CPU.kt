@@ -24,6 +24,14 @@ class CPU {
         }
     }
 
+    /**
+     * 0xA9 ; LoaD Accumulator
+     *
+     * Takes one argument of one byte
+     *
+     * Loads a byte of memory into the accumulator
+     * setting the zero and negative flags as appropriate.
+     */
     private fun lda(param: UByte) {
         programCounter++
         registerA = param
