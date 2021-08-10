@@ -31,4 +31,21 @@ class CPUTests {
 
         assertEquals(cpu.registerX, 10u.toUByte())
     }
+
+    @Test
+    fun `test 5 ops`() {
+        val cpu = CPU()
+        cpu.interpret(listOf(0xA9u, 0xC0u, 0xAAu, 0xE8u, 0x00u))
+
+        assertEquals(cpu.registerX, 0xC1u.toUByte())
+    }
+
+    @Test
+    fun `test INX overflow`() {
+        val cpu = CPU()
+        cpu.registerX = 0xFFu
+        cpu.interpret(listOf(0xE8u, 0xE8u, 0x00u))
+
+        assertEquals(cpu.registerX, 1u.toUByte())
+    }
 }

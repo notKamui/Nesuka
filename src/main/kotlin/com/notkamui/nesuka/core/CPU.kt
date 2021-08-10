@@ -4,7 +4,7 @@ class CPU {
     var registerA: UByte = 0u
     var registerX: UByte = 0u
     var status: UByte = 0u
-    var programCounter: UShort = 0u
+    private var programCounter: UShort = 0u
 
     /**
      * Interprets a [program] (which is a list of [UByte]s and runs it
@@ -18,10 +18,11 @@ class CPU {
 
             when (opcode) {
                 0xA9u.toUByte() -> {
-                    programCounter++
                     lda(program[programCounter.toInt()])
+                    programCounter++
                 }
                 0xAAu.toUByte() -> tax()
+                0xE8u.toUByte() -> inx()
                 0x00u.toUByte() -> return // brk
                 else -> TODO()
             }
@@ -67,6 +68,17 @@ class CPU {
      */
     private fun tax() {
         registerX = registerA
+        updateZeroNegFlags(registerX)
+    }
+
+    /**
+     * 0xE8 ; INcrement X register
+     *
+     * Adds one to the X register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun inx() {
+        registerX++
         updateZeroNegFlags(registerX)
     }
 }
