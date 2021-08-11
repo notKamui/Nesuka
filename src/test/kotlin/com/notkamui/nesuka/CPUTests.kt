@@ -1,6 +1,7 @@
 package com.notkamui.nesuka
 
 import com.notkamui.nesuka.core.CPU
+import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -22,6 +23,15 @@ class CPUTests {
         cpu.loadAndRun(listOf(0xA9.u8, 0x00.u8, 0x00.u8))
 
         assertEquals(cpu.status and 0b0000_0010.u8, 0b10.u8)
+    }
+
+    @Test
+    fun `test LDA from memory`() {
+        val cpu = CPU()
+        cpu.memWrite(0x10.u16, 0x55.u8)
+        cpu.loadAndRun(listOf(0xA5.u8, 0x10.u8, 0x00.u8))
+
+        assertEquals(cpu.registerA, 0x55.u8)
     }
 
     @Test

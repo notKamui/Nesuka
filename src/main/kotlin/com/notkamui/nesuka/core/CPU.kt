@@ -5,6 +5,20 @@ import com.notkamui.nesuka.utils.shr
 import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
 
+enum class AddressingMode {
+    Immediate,
+    ZeroPage,
+    Absolute,
+    ZeroPageX,
+    ZeroPageY,
+    AbsoluteX,
+    AbsoluteY,
+    IndirectX,
+    IndirectY,
+    NoneAddressing,
+
+}
+
 private interface Memory {
     val memory: Array<UByte>
 
@@ -22,7 +36,7 @@ private interface Memory {
     }
 
     /**
-     * Reads the memory at a specific [addr]ess for a u16 ([Short]).
+     * Reads the memory at a specific [addr]ess for an u16 ([Short]).
      */
     fun memReadShort(addr: UShort): UShort {
         val lo = memRead(addr).toUShort()
@@ -31,7 +45,7 @@ private interface Memory {
     }
 
     /**
-     * Sets the memory at a specific [addr]ess to the value of [data] for a u16 ([Short]).
+     * Sets the memory at a specific [addr]ess to the value of [data] for an u16 ([Short]).
      */
     fun memWriteShort(addr: UShort, data: UShort) {
         val hi = (data shr 8).toUByte()
@@ -48,12 +62,54 @@ class CPU : Memory {
     var registerX = 0.u8
         private set
 
+    var registerY = 0.u8
+        private set
+
     var status = 0.u8
         private set
 
     private var programCounter = 0.u16
 
     override val memory = Array(0xFFFF) { 0.u8 }
+
+    fun getOperandAddress(mode: AddressingMode): UShort = when (mode) {
+        AddressingMode.Immediate -> programCounter
+        AddressingMode.ZeroPage -> memRead(programCounter).toUShort()
+        AddressingMode.Absolute -> memReadShort(programCounter)
+        AddressingMode.ZeroPageX -> {
+            val pos = memRead(programCounter)
+            (pos + registerX).toUShort()
+        }
+        AddressingMode.ZeroPageY -> {
+            val pos = memRead(programCounter)
+            (pos + registerY).toUShort()
+        }
+        AddressingMode.AbsoluteX -> {
+            val base = memReadShort(programCounter)
+            (base + registerX).toUShort()
+        }
+        AddressingMode.AbsoluteY -> {
+            val base = memReadShort(programCounter)
+            (base + registerY).toUShort()
+        }
+        AddressingMode.IndirectX -> {
+            val base = memReadShort(programCounter)
+            val ptr = (base.toUByte() + registerX).toUByte()
+            val lo = memRead(ptr.toUShort())
+            val hi = memRead((ptr + 1u).toUShort())
+            ((hi.toUShort() shl 8) or lo.toInt()).toUShort()
+        }
+        AddressingMode.IndirectY -> {
+            val base = memRead(programCounter)
+            val lo = memRead(base.toUShort())
+            val hi = memRead((base + 1u).toUShort())
+            val derefBase = ((hi.toUShort() shl 8) or lo.toInt()).toUShort()
+            (derefBase + registerY.toUShort()).toUShort()
+        }
+        AddressingMode.NoneAddressing -> {
+            throw IllegalStateException("Mode $mode is not supported")
+        }
+    }
 
     /**
      * Sets the zero and negative flags according to a given register status
@@ -78,10 +134,14 @@ class CPU : Memory {
      * Takes one argument of one byte
      *
      * Loads a byte of memory into the accumulator
+     * according to the addressing [mode] given,
      * setting the zero and negative flags as appropriate.
      */
-    private fun lda(param: UByte) {
-        registerA = param
+    private fun lda(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val value = memRead(addr)
+
+        registerA = value
         updateZeroNegFlags(registerA)
     }
 
@@ -111,6 +171,7 @@ class CPU : Memory {
     private fun reset() {
         registerA = 0.u8
         registerX = 0.u8
+        registerY = 0.u8
         status = 0.u8
 
         programCounter = memReadShort(0xFFFC.u16)
@@ -136,7 +197,16 @@ class CPU : Memory {
 
             when (opcode) {
                 0xA9.u8 -> {
-                    lda(memRead(programCounter))
+                    lda(AddressingMode.Immediate)
+                    programCounter++
+                }
+                0xA5.u8 -> {
+                    lda(AddressingMode.ZeroPage)
+                    programCounter++
+                }
+                0xAD.u8 -> {
+                    lda(AddressingMode.Absolute)
+                    programCounter++
                     programCounter++
                 }
                 0xAA.u8 -> tax()
@@ -148,7 +218,7 @@ class CPU : Memory {
     }
 
     /**
-     * Loads a [program] into memeory and runs it.
+     * Loads a [program] into memory and runs it.
      */
     fun loadAndRun(program: List<UByte>) {
         load(program)
