@@ -1,5 +1,6 @@
 package com.notkamui.nesuka.core
 
+import com.notkamui.nesuka.utils.OpCode.Companion.OPCODES_MAP
 import com.notkamui.nesuka.utils.shl
 import com.notkamui.nesuka.utils.shr
 import com.notkamui.nesuka.utils.u16
@@ -72,7 +73,10 @@ class CPU : Memory {
 
     override val memory = Array(0xFFFF) { 0.u8 }
 
-    fun getOperandAddress(mode: AddressingMode): UShort = when (mode) {
+    /**
+     * Gets the address for the next operand given an addressing [mode].
+     */
+    private fun getOperandAddress(mode: AddressingMode): UShort = when (mode) {
         AddressingMode.Immediate -> programCounter
         AddressingMode.ZeroPage -> memRead(programCounter).toUShort()
         AddressingMode.Absolute -> memReadShort(programCounter)
@@ -112,7 +116,7 @@ class CPU : Memory {
     }
 
     /**
-     * Sets the zero and negative flags according to a given register status
+     * Sets the zero and negative flags according to a given register status.
      */
     private fun updateZeroNegFlags(value: UByte) {
         status = if (value == 0.u8) {
@@ -129,7 +133,7 @@ class CPU : Memory {
     }
 
     /**
-     * 0xA9/A5/AD ; LoaD Accumulator
+     * LoaD Accumulator
      *
      * Loads a byte of memory into the accumulator
      * according to the addressing [mode] given,
@@ -144,7 +148,7 @@ class CPU : Memory {
     }
 
     /**
-     * 0xAA ; Transfer Accumulator to X
+     * Transfer Accumulator to X
      *
      * Copies the current contents of the accumulator
      * into the X register and sets the zero and negative
@@ -156,7 +160,7 @@ class CPU : Memory {
     }
 
     /**
-     * 0xE8 ; INcrement X register
+     * INcrement X register
      *
      * Adds one to the X register
      * setting the zero and negative flags as appropriate.
@@ -167,7 +171,7 @@ class CPU : Memory {
     }
 
     /**
-     * 0x85/95 ; STore Accumulator
+     * STore Accumulator
      *
      * Stores the content of the accumulator into memory.
      */
@@ -203,35 +207,30 @@ class CPU : Memory {
      */
     private fun run() {
         while (true) {
-            val opcode = memRead(programCounter)
+            val code = memRead(programCounter)
             programCounter++
+            val programCounterState = programCounter
 
-            when (opcode) {
-                0xA9.u8 -> {
-                    lda(AddressingMode.Immediate)
-                    programCounter++
-                }
-                0xA5.u8 -> {
-                    lda(AddressingMode.ZeroPage)
-                    programCounter++
-                }
-                0xAD.u8 -> {
-                    lda(AddressingMode.Absolute)
-                    programCounter++
-                    programCounter++
-                }
+            val opcode = OPCODES_MAP[code]
+                ?: throw IllegalStateException("OpCode $code is not recognized")
+
+            when (code) {
+                0xA9.u8, 0xA5.u8, 0xB5.u8, 0xAD.u8,
+                0xBD.u8, 0xB9.u8, 0xA1.u8, 0xB1.u8 ->
+                    lda(opcode.mode)
+
+                0x85.u8, 0x95.u8, 0x8D.u8, 0x9D.u8,
+                0x99.u8, 0x81.u8, 0x91.u8 ->
+                    sta(opcode.mode)
+
                 0xAA.u8 -> tax()
                 0xE8.u8 -> inx()
-                0x95.u8 -> {
-                    sta(AddressingMode.ZeroPage)
-                    programCounter++
-                }
-                0x95.u8 -> {
-                    sta(AddressingMode.ZeroPageX)
-                    programCounter++
-                }
                 0x00.u8 -> return // brk
                 else -> TODO()
+            }
+
+            if (programCounterState == programCounter) {
+                programCounter = (programCounter + (opcode.len - 1u).toUShort()).toUShort()
             }
         }
     }
