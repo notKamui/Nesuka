@@ -129,9 +129,7 @@ class CPU : Memory {
     }
 
     /**
-     * 0xA9 ; LoaD Accumulator
-     *
-     * Takes one argument of one byte
+     * 0xA9/A5/AD ; LoaD Accumulator
      *
      * Loads a byte of memory into the accumulator
      * according to the addressing [mode] given,
@@ -168,6 +166,19 @@ class CPU : Memory {
         updateZeroNegFlags(registerX)
     }
 
+    /**
+     * 0x85/95 ; STore Accumulator
+     *
+     * Stores the content of the accumulator into memory.
+     */
+    private fun sta(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        memWrite(addr, registerA)
+    }
+
+    /**
+     * Resets the state of the CPU.
+     */
     private fun reset() {
         registerA = 0.u8
         registerX = 0.u8
@@ -211,6 +222,14 @@ class CPU : Memory {
                 }
                 0xAA.u8 -> tax()
                 0xE8.u8 -> inx()
+                0x95.u8 -> {
+                    sta(AddressingMode.ZeroPage)
+                    programCounter++
+                }
+                0x95.u8 -> {
+                    sta(AddressingMode.ZeroPageX)
+                    programCounter++
+                }
                 0x00.u8 -> return // brk
                 else -> TODO()
             }
