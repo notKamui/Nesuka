@@ -1,29 +1,32 @@
 package com.notkamui.nesuka.core
 
+import com.notkamui.nesuka.utils.u16
+import com.notkamui.nesuka.utils.u8
+
 class CPU {
-    var registerA: UByte = 0u
-    var registerX: UByte = 0u
-    var status: UByte = 0u
-    private var programCounter: UShort = 0u
+    var registerA = 0.u8
+    var registerX = 0.u8
+    var status = 0.u8
+    private var programCounter = 0.u16
 
     /**
      * Interprets a [program] (which is a list of [UByte]s and runs it
      */
     fun interpret(program: List<UByte>) {
-        programCounter = 0u
+        programCounter = 0.u16
 
         while (true) {
             val opcode = program[programCounter.toInt()]
             programCounter++
 
             when (opcode) {
-                0xA9u.toUByte() -> {
+                0xA9.u8 -> {
                     lda(program[programCounter.toInt()])
                     programCounter++
                 }
-                0xAAu.toUByte() -> tax()
-                0xE8u.toUByte() -> inx()
-                0x00u.toUByte() -> return // brk
+                0xAA.u8 -> tax()
+                0xE8.u8 -> inx()
+                0x00.u8 -> return // brk
                 else -> TODO()
             }
         }
@@ -33,16 +36,16 @@ class CPU {
      * Sets the zero and negative flags according to a given register status
      */
     private fun updateZeroNegFlags(value: UByte) {
-        status = if (value == 0u.toUByte()) {
-            status or 0b0000_0010u
+        status = if (value == 0.u8) {
+            status or 0b0000_0010.u8
         } else {
-            status and 0b1111_1101u
+            status and 0b1111_1101.u8
         }
 
-        status = if (value and 0b1000_0000u != 0u.toUByte()) {
-            status or 0b1000_0000u
+        status = if (value and 0b1000_0000.u8 != 0.u8) {
+            status or 0b1000_0000.u8
         } else {
-            status and 0b0111_1111u
+            status and 0b0111_1111.u8
         }
     }
 
