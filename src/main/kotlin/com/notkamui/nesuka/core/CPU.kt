@@ -5,7 +5,43 @@ import com.notkamui.nesuka.utils.shr
 import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
 
-class CPU {
+private interface Memory {
+    val memory: Array<UByte>
+
+    /**
+     * Reads the memory at a specific [addr]ess.
+     */
+    fun memRead(addr: UShort): UByte =
+        memory[addr.toInt()]
+
+    /**
+     * Sets the memory at a specific [addr]ess to the value of [data].
+     */
+    fun memWrite(addr: UShort, data: UByte) {
+        memory[addr.toInt()] = data
+    }
+
+    /**
+     * Reads the memory at a specific [addr]ess for a u16 ([Short]).
+     */
+    fun memReadShort(addr: UShort): UShort {
+        val lo = memRead(addr).toUShort()
+        val hi = memRead((addr + 1u).toUShort()).toUShort()
+        return ((hi shl 8) or lo.toInt()).toUShort()
+    }
+
+    /**
+     * Sets the memory at a specific [addr]ess to the value of [data] for a u16 ([Short]).
+     */
+    fun memWriteShort(addr: UShort, data: UShort) {
+        val hi = (data shr 8).toUByte()
+        val lo = (data and 0xFF.u16).toUByte()
+        memWrite(addr, lo)
+        memWrite((addr + 1u).toUShort(), hi)
+    }
+}
+
+class CPU : Memory {
     var registerA = 0.u8
         private set
 
@@ -17,7 +53,7 @@ class CPU {
 
     private var programCounter = 0.u16
 
-    private val memory = Array(0xFFFF) { 0.u8 }
+    override val memory = Array(0xFFFF) { 0.u8 }
 
     /**
      * Sets the zero and negative flags according to a given register status
@@ -70,38 +106,6 @@ class CPU {
     private fun inx() {
         registerX++
         updateZeroNegFlags(registerX)
-    }
-
-    /**
-     * Reads the memory at a specific [addr]ess.
-     */
-    private fun memRead(addr: UShort): UByte =
-        memory[addr.toInt()]
-
-    /**
-     * Sets the memory at a specific [addr]ess to the value of [data].
-     */
-    private fun memWrite(addr: UShort, data: UByte) {
-        memory[addr.toInt()] = data
-    }
-
-    /**
-     * Reads the memory at a specific [addr]ess for a u16 ([Short]).
-     */
-    private fun memReadShort(addr: UShort): UShort {
-        val lo = memRead(addr).toUShort()
-        val hi = memRead((addr + 1u).toUShort()).toUShort()
-        return ((hi shl 8) or lo.toInt()).toUShort()
-    }
-
-    /**
-     * Sets the memory at a specific [addr]ess to the value of [data] for a u16 ([Short]).
-     */
-    private fun memWriteShort(addr: UShort, data: UShort) {
-        val hi = (data shr 8).toUByte()
-        val lo = (data and 0xFF.u16).toUByte()
-        memWrite(addr, lo)
-        memWrite((addr + 1u).toUShort(), hi)
     }
 
     private fun reset() {
