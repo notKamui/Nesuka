@@ -351,7 +351,7 @@ class CPU : Memory {
 
     private fun aslAccumulator() {
         var data = registerA
-        if (data shr 7 == 1) {
+        if ((data shr 7).u8 == 1.u8) {
             insertFlag(CPUFlags.CARRY)
         } else {
             removeFlag(CPUFlags.CARRY)
@@ -373,12 +373,44 @@ class CPU : Memory {
     private fun asl(mode: AddressingMode): UByte {
         val addr = getOperandAddress(mode)
         var data = memRead(addr)
-        if (data shr 7 == 1) {
+        if ((data shr 7).u8 == 1.u8) {
             insertFlag(CPUFlags.CARRY)
         } else {
             removeFlag(CPUFlags.CARRY)
         }
         data = (data shl 1).u8
+        memWrite(addr, data)
+        updateZeroNegFlags(data)
+        return data
+    }
+
+    private fun lsrAccumulator() {
+        var data = registerA
+        if (data and 1u == 1.u8) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shr 1).u8
+        setRegisterA(data)
+    }
+
+    /**
+     * Logical Shift Right
+     *
+     * Each of the bits in A or M is shift one place to the right.
+     * The bit that was in bit 0 is shifted into the carry flag.
+     * Bit 7 is set to zero.
+     */
+    private fun lsr(mode: AddressingMode): UByte {
+        val addr = getOperandAddress(mode)
+        var data = memRead(addr)
+        if (data and 1u == 1.u8) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shr 1).u8
         memWrite(addr, data)
         updateZeroNegFlags(data)
         return data
