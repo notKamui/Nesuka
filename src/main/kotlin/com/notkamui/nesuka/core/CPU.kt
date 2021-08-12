@@ -178,6 +178,16 @@ class CPU : Memory {
     }
 
     /**
+     * STore Accumulator
+     *
+     * Stores the content of the accumulator into memory.
+     */
+    private fun sta(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        memWrite(addr, registerA)
+    }
+
+    /**
      * Transfer Accumulator to X
      *
      * Copies the current contents of the accumulator
@@ -198,16 +208,6 @@ class CPU : Memory {
     private fun inx() {
         registerX++
         updateZeroNegFlags(registerX)
-    }
-
-    /**
-     * STore Accumulator
-     *
-     * Stores the content of the accumulator into memory.
-     */
-    private fun sta(mode: AddressingMode) {
-        val addr = getOperandAddress(mode)
-        memWrite(addr, registerA)
     }
 
     /**
