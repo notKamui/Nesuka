@@ -1,24 +1,23 @@
 package com.notkamui.nesuka.core
 
+import com.notkamui.nesuka.utils.AddressingMode
+import com.notkamui.nesuka.utils.AddressingMode.Absolute
+import com.notkamui.nesuka.utils.AddressingMode.AbsoluteX
+import com.notkamui.nesuka.utils.AddressingMode.AbsoluteY
+import com.notkamui.nesuka.utils.AddressingMode.Immediate
+import com.notkamui.nesuka.utils.AddressingMode.IndirectX
+import com.notkamui.nesuka.utils.AddressingMode.IndirectY
+import com.notkamui.nesuka.utils.AddressingMode.NoneAddressing
+import com.notkamui.nesuka.utils.AddressingMode.ZeroPage
+import com.notkamui.nesuka.utils.AddressingMode.ZeroPageX
+import com.notkamui.nesuka.utils.AddressingMode.ZeroPageY
+import com.notkamui.nesuka.utils.CPUFlags
 import com.notkamui.nesuka.utils.OpCode.Companion.OPCODES_MAP
+import com.notkamui.nesuka.utils.STACK_RESET
 import com.notkamui.nesuka.utils.shl
 import com.notkamui.nesuka.utils.shr
 import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
-
-enum class AddressingMode {
-    Immediate,
-    ZeroPage,
-    Absolute,
-    ZeroPageX,
-    ZeroPageY,
-    AbsoluteX,
-    AbsoluteY,
-    IndirectX,
-    IndirectY,
-    NoneAddressing,
-
-}
 
 private interface Memory {
     val memory: Array<UByte>
@@ -26,15 +25,12 @@ private interface Memory {
     /**
      * Reads the memory at a specific [addr]ess.
      */
-    fun memRead(addr: UShort): UByte =
-        memory[addr.toInt()]
+    fun memRead(addr: UShort): UByte
 
     /**
      * Sets the memory at a specific [addr]ess to the value of [data].
      */
-    fun memWrite(addr: UShort, data: UByte) {
-        memory[addr.toInt()] = data
-    }
+    fun memWrite(addr: UShort, data: UByte)
 
     /**
      * Reads the memory at a specific [addr]ess for an u16 ([Short]).
@@ -66,51 +62,61 @@ class CPU : Memory {
     var registerY = 0.u8
         private set
 
-    var status = 0.u8
+    var stackPointer = STACK_RESET
         private set
 
     private var programCounter = 0.u16
 
-    override val memory = Array(0xFFFF) { 0.u8 }
+    var status = CPUFlags.INTERRUPT_DISABLE or CPUFlags.BREAK_2
+        private set
+
+    override var memory = Array(0xFFFF) { 0.u8 }
+
+    override fun memRead(addr: UShort): UByte =
+        memory[addr.toInt()]
+
+    override fun memWrite(addr: UShort, data: UByte) {
+        memory[addr.toInt()] = data
+    }
 
     /**
      * Gets the address for the next operand given an addressing [mode].
      */
     private fun getOperandAddress(mode: AddressingMode): UShort = when (mode) {
-        AddressingMode.Immediate -> programCounter
-        AddressingMode.ZeroPage -> memRead(programCounter).toUShort()
-        AddressingMode.Absolute -> memReadShort(programCounter)
-        AddressingMode.ZeroPageX -> {
+        Immediate -> programCounter
+        ZeroPage -> memRead(programCounter).toUShort()
+        Absolute -> memReadShort(programCounter)
+        ZeroPageX -> {
             val pos = memRead(programCounter)
             (pos + registerX).toUShort()
         }
-        AddressingMode.ZeroPageY -> {
+        ZeroPageY -> {
             val pos = memRead(programCounter)
             (pos + registerY).toUShort()
         }
-        AddressingMode.AbsoluteX -> {
+        AbsoluteX -> {
             val base = memReadShort(programCounter)
             (base + registerX).toUShort()
         }
-        AddressingMode.AbsoluteY -> {
+        AbsoluteY -> {
             val base = memReadShort(programCounter)
             (base + registerY).toUShort()
         }
-        AddressingMode.IndirectX -> {
+        IndirectX -> {
             val base = memReadShort(programCounter)
             val ptr = (base.toUByte() + registerX).toUByte()
             val lo = memRead(ptr.toUShort())
             val hi = memRead((ptr + 1u).toUShort())
             ((hi.toUShort() shl 8) or lo.toInt()).toUShort()
         }
-        AddressingMode.IndirectY -> {
+        IndirectY -> {
             val base = memRead(programCounter)
             val lo = memRead(base.toUShort())
             val hi = memRead((base + 1u).toUShort())
             val derefBase = ((hi.toUShort() shl 8) or lo.toInt()).toUShort()
             (derefBase + registerY.toUShort()).toUShort()
         }
-        AddressingMode.NoneAddressing -> {
+        NoneAddressing -> {
             throw IllegalStateException("Mode $mode is not supported")
         }
     }
@@ -187,7 +193,9 @@ class CPU : Memory {
         registerA = 0.u8
         registerX = 0.u8
         registerY = 0.u8
-        status = 0.u8
+        stackPointer = STACK_RESET
+        status = CPUFlags.INTERRUPT_DISABLE or CPUFlags.BREAK_2
+        memory = Array(0xFFFF) { 0.u8 }
 
         programCounter = memReadShort(0xFFFC.u16)
     }
