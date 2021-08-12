@@ -79,7 +79,7 @@ class CPU : Memory {
     }
 
     /**
-     * Gets the address for the next operand given an addressing [mode].
+     * Gets the address for the next operand given an addressing [mode]
      */
     private fun getOperandAddress(mode: AddressingMode): UShort = when (mode) {
         Immediate -> programCounter
@@ -118,6 +118,41 @@ class CPU : Memory {
         NoneAddressing -> {
             throw IllegalStateException("Mode $mode is not supported")
         }
+    }
+
+    private fun setRegisterA(value: UByte) {
+        registerA = value
+        updateZeroNegFlags(registerA)
+    }
+
+    private fun insertFlag(flag: UByte) {
+        status = status or flag
+    }
+
+    private fun removeFlag(flag: UByte) {
+        status = status and flag.inv()
+    }
+
+    private fun hasFlag(flag: UByte): Boolean =
+        status and flag == flag
+
+    private fun addToRegisterA(data: UByte) {
+        val sum =
+            (registerA.toUShort() + data.toUShort() + (if (hasFlag(CPUFlags.CARRY)) 1 else 0).toUShort()).toUShort()
+        if (sum > 0xFF.u16) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+
+        val result = sum.toUByte()
+        if ((data xor result) and (result xor registerA) and 0x80.u8 != 0.u8) {
+            insertFlag(CPUFlags.OVERFLOW)
+        } else {
+            removeFlag(CPUFlags.OVERFLOW)
+        }
+
+        setRegisterA(result)
     }
 
     /**
@@ -183,11 +218,6 @@ class CPU : Memory {
     private fun sta(mode: AddressingMode) {
         val addr = getOperandAddress(mode)
         memWrite(addr, registerA)
-    }
-
-    private fun setRegisterA(value: UByte) {
-        registerA = value
-        updateZeroNegFlags(registerA)
     }
 
     /**
@@ -261,6 +291,38 @@ class CPU : Memory {
     private fun iny() {
         registerY++
         updateZeroNegFlags(registerY)
+    }
+
+    /**
+     * SuBtract with Carry
+     *
+     * This instruction subtracts the contents
+     * of a memory location to the accumulator
+     * together with the not of the carry bit.
+     * If overflow occurs the carry bit is clear,
+     * this enables multiple byte subtractions
+     * to be performed.
+     */
+    private fun sbc(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        addToRegisterA((data.toByte() - 1).u8)
+    }
+
+    /**
+     * ADd with Carry
+     *
+     * This instruction adds the contents
+     * of a memory location to the accumulator
+     * together with carry bit.
+     * If overflow occurs the carry bit is set,
+     * this enables multiple byte additions
+     * to be performed.
+     */
+    private fun adc(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val value = memRead(addr)
+        addToRegisterA(value)
     }
 
     /**
