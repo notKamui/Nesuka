@@ -53,6 +53,7 @@ private interface Memory {
     }
 }
 
+@Suppress("DuplicatedCode")
 class CPU : Memory {
     var registerA = 0.u8
         private set
@@ -411,6 +412,46 @@ class CPU : Memory {
             removeFlag(CPUFlags.CARRY)
         }
         data = (data shr 1).u8
+        memWrite(addr, data)
+        updateZeroNegFlags(data)
+        return data
+    }
+
+    private fun rolAccumulator() {
+        var data = registerA
+        val oldCarry = hasFlag(CPUFlags.CARRY)
+        if ((data shr 7).u8 == 1.u8) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shl 1).u8
+        if (oldCarry) {
+            data = data or 1.u8
+        }
+        setRegisterA(data)
+    }
+
+    /**
+     * ROtate Left
+     *
+     * Move each of the bits in either A or M one place to the left.
+     * Bit 0 is filled with the current value of the carry flag
+     * whilst the old bit 7 becomes the new carry flag value.
+     */
+    private fun rol(mode: AddressingMode): UByte {
+        val addr = getOperandAddress(mode)
+        var data = memRead(addr)
+        val oldCarry = hasFlag(CPUFlags.CARRY)
+        if ((data shr 7).u8 == 1.u8) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shl 1).u8
+        if (oldCarry) {
+            data = data or 1.u8
+        }
         memWrite(addr, data)
         updateZeroNegFlags(data)
         return data
