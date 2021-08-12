@@ -62,8 +62,7 @@ class CPU : Memory {
     var registerY = 0.u8
         private set
 
-    var stackPointer = STACK_RESET
-        private set
+    private var stackPointer = STACK_RESET
 
     private var programCounter = 0.u16
 
@@ -139,10 +138,35 @@ class CPU : Memory {
     }
 
     /**
+     * LoaD Y register
+     *
+     * Loads a byte of memory into the Y register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun ldy(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        registerY = data
+        updateZeroNegFlags(registerY)
+    }
+
+    /**
+     * LoaD X register
+     *
+     * Loads a byte of memory into the X register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun ldx(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        registerX = data
+        updateZeroNegFlags(registerX)
+    }
+
+    /**
      * LoaD Accumulator
      *
      * Loads a byte of memory into the accumulator
-     * according to the addressing [mode] given,
      * setting the zero and negative flags as appropriate.
      */
     private fun lda(mode: AddressingMode) {
