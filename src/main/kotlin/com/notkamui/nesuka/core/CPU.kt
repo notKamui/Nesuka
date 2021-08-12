@@ -172,9 +172,7 @@ class CPU : Memory {
     private fun lda(mode: AddressingMode) {
         val addr = getOperandAddress(mode)
         val value = memRead(addr)
-
-        registerA = value
-        updateZeroNegFlags(registerA)
+        setRegisterA(value)
     }
 
     /**
@@ -185,6 +183,50 @@ class CPU : Memory {
     private fun sta(mode: AddressingMode) {
         val addr = getOperandAddress(mode)
         memWrite(addr, registerA)
+    }
+
+    private fun setRegisterA(value: UByte) {
+        registerA = value
+        updateZeroNegFlags(registerA)
+    }
+
+    /**
+     * logical AND
+     *
+     * A logical AND is performed, bit by bit,
+     * on the accumulator contents using the contents
+     * of a byte of memory.
+     */
+    private fun and(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        setRegisterA(data and registerA)
+    }
+
+    /**
+     * Exclusive OR
+     *
+     * An exclusive OR is performed, bit by bit,
+     * on the accumulator contents using the contents
+     * of a byte of memory.
+     */
+    private fun eor(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        setRegisterA(data xor registerA)
+    }
+
+    /**
+     * logical inclusive OR (on A)
+     *
+     * An inclusive OR is performed, bit by bit,
+     * on the accumulator contents using the contents
+     * of a byte of memory.
+     */
+    private fun ora(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        setRegisterA(data or registerA)
     }
 
     /**
