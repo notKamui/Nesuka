@@ -349,6 +349,41 @@ class CPU : Memory {
         addToRegisterA(value)
     }
 
+    private fun aslAccumulator() {
+        var data = registerA
+        if (data shr 7 == 1) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shl 1).u8
+        setRegisterA(data)
+    }
+
+    /**
+     * Arithmetic Shift Left
+     *
+     * This operation shifts all the bits of the accumulator
+     * or memory contents one bit left.
+     * Bit 0 is set to 0 and bit 7 is placed in the carry flag.
+     * The effect of this operation is to multiply
+     * the memory contents by 2 (ignoring 2's complement considerations),
+     * setting the carry if the result will not fit in 8 bits.
+     */
+    private fun asl(mode: AddressingMode): UByte {
+        val addr = getOperandAddress(mode)
+        var data = memRead(addr)
+        if (data shr 7 == 1) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shl 1).u8
+        memWrite(addr, data)
+        updateZeroNegFlags(data)
+        return data
+    }
+
     /**
      * Resets the state of the CPU.
      */
