@@ -297,28 +297,6 @@ class CPU : Memory {
     }
 
     /**
-     * INcrement X register
-     *
-     * Adds one to the X register
-     * setting the zero and negative flags as appropriate.
-     */
-    private fun inx() {
-        registerX++
-        updateZeroNegFlags(registerX)
-    }
-
-    /**
-     * INcrement Y register
-     *
-     * Adds one to the Y register
-     * setting the zero and negative flags as appropriate.
-     */
-    private fun iny() {
-        registerY++
-        updateZeroNegFlags(registerY)
-    }
-
-    /**
      * SuBtract with Carry
      *
      * This instruction subtracts the contents
@@ -495,6 +473,80 @@ class CPU : Memory {
         memWrite(addr, data)
         updateZeroNegFlags(data)
         return data
+    }
+
+    /**
+     * INCrement memory
+     *
+     * Adds one to the value held at a specified memory location
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun inc(mode: AddressingMode): UByte {
+        val addr = getOperandAddress(mode)
+        var data = memRead(addr)
+        data++
+        memWrite(addr, data)
+        updateZeroNegFlags(data)
+        return data
+    }
+
+    /**
+     * INcrement X register
+     *
+     * Adds one to the X register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun inx() {
+        registerX++
+        updateZeroNegFlags(registerX)
+    }
+
+    /**
+     * INcrement Y register
+     *
+     * Adds one to the Y register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun iny() {
+        registerY++
+        updateZeroNegFlags(registerY)
+    }
+
+    /**
+     * DECrement memory
+     *
+     * Subtracts one from the value held at a specified memory location
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun dec(mode: AddressingMode): UByte {
+        val addr = getOperandAddress(mode)
+        var data = memRead(addr)
+        data--
+        memWrite(addr, data)
+        updateZeroNegFlags(data)
+        return data
+    }
+
+    /**
+     * DEcrement X register
+     *
+     * Subtracts one from the X register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun dex() {
+        registerX--
+        updateZeroNegFlags(registerX)
+    }
+
+    /**
+     * DEcrement Y register
+     *
+     * Subtracts one from the Y register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun dey() {
+        registerY--
+        updateZeroNegFlags(registerY)
     }
 
     /**
