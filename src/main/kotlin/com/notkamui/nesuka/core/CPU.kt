@@ -13,6 +13,7 @@ import com.notkamui.nesuka.utils.AddressingMode.ZeroPageX
 import com.notkamui.nesuka.utils.AddressingMode.ZeroPageY
 import com.notkamui.nesuka.utils.CPUFlags
 import com.notkamui.nesuka.utils.OpCode.Companion.OPCODES_MAP
+import com.notkamui.nesuka.utils.STACK
 import com.notkamui.nesuka.utils.STACK_RESET
 import com.notkamui.nesuka.utils.shl
 import com.notkamui.nesuka.utils.shr
@@ -135,6 +136,29 @@ class CPU : Memory {
 
     private fun hasFlag(flag: UByte): Boolean =
         status and flag == flag
+
+    private fun stackPop(): UByte {
+        stackPointer++
+        return memRead((STACK + stackPointer).toUShort())
+    }
+
+    private fun stackPush(data: UByte) {
+        memWrite((STACK + stackPointer).toUShort(), data)
+        stackPointer--
+    }
+
+    private fun stackPopShort(): UShort {
+        val lo = stackPop().toUShort()
+        val hi = stackPop().toUShort()
+        return ((hi shl 8) or lo.toInt()).u16
+    }
+
+    private fun stackPushShort(data: UShort) {
+        val hi = (data shl 8).toUByte()
+        val lo = (data and 0xFF.u16).toUByte()
+        stackPush(hi)
+        stackPush(lo)
+    }
 
     private fun addToRegisterA(data: UByte) {
         val sum =
