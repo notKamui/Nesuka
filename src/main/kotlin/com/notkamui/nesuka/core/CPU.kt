@@ -585,6 +585,35 @@ class CPU : Memory {
     }
 
     /**
+     * BIt Test
+     *
+     * This instruction is used to test if one or more bits are set in a target memory location.
+     * The mask pattern in A is ANDed with the value in memory to set or clear the zero flag,
+     * but the result is not kept.
+     * Bits 7 and 6 of the value from memory are copied into the N and V flags.
+     */
+    private fun bit(mode: AddressingMode) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        val and = registerA and data
+        if (and == 0.u8) {
+            insertFlag(CPUFlags.ZERO)
+        } else {
+            removeFlag(CPUFlags.ZERO)
+        }
+        if (data and 0b1000_0000.u8 > 0.u8) {
+            insertFlag(CPUFlags.NEGATIVE)
+        } else {
+            removeFlag(CPUFlags.NEGATIVE)
+        }
+        if (data and 0b0100_0000.u8 > 0.u8) {
+            insertFlag(CPUFlags.OVERFLOW)
+        } else {
+            removeFlag(CPUFlags.OVERFLOW)
+        }
+    }
+
+    /**
      * Resets the state of the CPU.
      */
     private fun reset() {
