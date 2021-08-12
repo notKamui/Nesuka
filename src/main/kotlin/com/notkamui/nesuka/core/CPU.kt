@@ -253,6 +253,17 @@ class CPU : Memory {
     }
 
     /**
+     * INcrement Y register
+     *
+     * Adds one to the Y register
+     * setting the zero and negative flags as appropriate.
+     */
+    private fun iny() {
+        registerY++
+        updateZeroNegFlags(registerY)
+    }
+
+    /**
      * Resets the state of the CPU.
      */
     private fun reset() {
