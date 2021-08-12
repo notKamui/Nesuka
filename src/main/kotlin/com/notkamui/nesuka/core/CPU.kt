@@ -550,6 +550,41 @@ class CPU : Memory {
     }
 
     /**
+     * PuLl Accumulator
+     *
+     * Pulls an 8 bit value from the stack and into the accumulator.
+     * The zero and negative flags are set as appropriate.
+     */
+    private fun pla() {
+        val data = stackPop()
+        setRegisterA(data)
+    }
+
+    /**
+     * PuLl Processor status
+     *
+     * Pulls an 8 bit value from the stack and into the processor flags.
+     * The flags will take on new states as determined by the value pulled.
+     */
+    private fun plp() {
+        status = stackPop()
+        removeFlag(CPUFlags.BREAK)
+        insertFlag(CPUFlags.BREAK_2)
+    }
+
+    /**
+     * PusH Processor status
+     *
+     * Pushes a copy of the status flags on to the stack.
+     */
+    private fun php() {
+        var flags = status
+        flags = flags or CPUFlags.BREAK
+        flags = flags or CPUFlags.BREAK_2
+        stackPush(flags)
+    }
+
+    /**
      * Resets the state of the CPU.
      */
     private fun reset() {
