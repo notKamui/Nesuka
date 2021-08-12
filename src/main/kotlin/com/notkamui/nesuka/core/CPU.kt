@@ -613,6 +613,25 @@ class CPU : Memory {
         }
     }
 
+    private fun compare(mode: AddressingMode, compareWith: UByte) {
+        val addr = getOperandAddress(mode)
+        val data = memRead(addr)
+        if (data <= compareWith) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        updateZeroNegFlags((compareWith - data).toUByte())
+    }
+
+    private fun branch(condition: Boolean) {
+        if (condition) {
+            val jump = memRead(programCounter).toByte()
+            val jumpAddr = (programCounter + 1u + jump.toUShort()).toUShort()
+            programCounter = jumpAddr
+        }
+    }
+
     /**
      * Resets the state of the CPU.
      */
