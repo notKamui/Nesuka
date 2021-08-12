@@ -457,6 +457,46 @@ class CPU : Memory {
         return data
     }
 
+    private fun rorAccumulator() {
+        var data = registerA
+        val oldCarry = hasFlag(CPUFlags.CARRY)
+        if (data and 1u == 1.u8) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shr 1).u8
+        if (oldCarry) {
+            data = data or 0b1000_0000.u8
+        }
+        setRegisterA(data)
+    }
+
+    /**
+     * ROtate Right
+     *
+     * Move each of the bits in either A or M one place to the right.
+     * Bit 7 is filled with the current value of the carry flag
+     * whilst the old bit 0 becomes the new carry flag value.
+     */
+    private fun ror(mode: AddressingMode): UByte {
+        val addr = getOperandAddress(mode)
+        var data = memRead(addr)
+        val oldCarry = hasFlag(CPUFlags.CARRY)
+        if (data and 1u == 1.u8) {
+            insertFlag(CPUFlags.CARRY)
+        } else {
+            removeFlag(CPUFlags.CARRY)
+        }
+        data = (data shr 1).u8
+        if (oldCarry) {
+            data = data or 0b1000_0000.u8
+        }
+        memWrite(addr, data)
+        updateZeroNegFlags(data)
+        return data
+    }
+
     /**
      * Resets the state of the CPU.
      */
