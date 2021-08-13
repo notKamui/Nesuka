@@ -508,8 +508,8 @@ class OpCode(
 
     companion object {
         private val CPU_OPS_CODES = listOf(
-            OpCode(0x00, "BRK", 1, 7) { return@OpCode },
-            OpCode(0xEA, "NOP", 1, 2) {},
+            OpCode(0x00, "BRK", 1, 7) { /*return*/ },
+            OpCode(0xEA, "NOP", 1, 2) { /*nothing*/ },
 
             // Arithmetic
             OpCode(0x69, "ADC", 2, 2) { adc(Immediate) },
