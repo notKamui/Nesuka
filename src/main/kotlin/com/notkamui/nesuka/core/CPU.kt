@@ -184,16 +184,16 @@ class CPU : Memory {
      * Sets the zero and negative flags according to a given register status.
      */
     private fun updateZeroNegFlags(value: UByte) {
-        status = if (value == 0.u8) {
-            status or 0b0000_0010.u8
+        if (value == 0.u8) {
+            insertFlag(CPUFlags.ZERO)
         } else {
-            status and 0b1111_1101.u8
+            removeFlag(CPUFlags.ZERO)
         }
 
-        status = if (value and 0b1000_0000.u8 != 0.u8) {
-            status or 0b1000_0000.u8
+        if (value and 0b1000_0000.u8 != 0.u8) {
+            insertFlag(CPUFlags.NEGATIVE)
         } else {
-            status and 0b0111_1111.u8
+            removeFlag(CPUFlags.NEGATIVE)
         }
     }
 
@@ -641,7 +641,6 @@ class CPU : Memory {
         registerY = 0.u8
         stackPointer = STACK_RESET
         status = CPUFlags.INTERRUPT_DISABLE or CPUFlags.BREAK_2
-        memory = Array(0xFFFF) { 0.u8 }
 
         programCounter = memReadShort(0xFFFC.u16)
     }
@@ -650,6 +649,7 @@ class CPU : Memory {
      * Loads a [program] into memory.
      */
     private fun load(program: List<UByte>) {
+        //memory = Array(0xFFFF) { 0.u8 }
         program.forEachIndexed { index, opcode ->
             memWrite((0x8000 + index).u16, opcode)
         }

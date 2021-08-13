@@ -1,16 +1,15 @@
 package com.notkamui.nesuka.utils
 
-import com.notkamui.nesuka.core.AddressingMode
-import com.notkamui.nesuka.core.AddressingMode.Absolute
-import com.notkamui.nesuka.core.AddressingMode.AbsoluteX
-import com.notkamui.nesuka.core.AddressingMode.AbsoluteY
-import com.notkamui.nesuka.core.AddressingMode.Immediate
-import com.notkamui.nesuka.core.AddressingMode.IndirectX
-import com.notkamui.nesuka.core.AddressingMode.IndirectY
-import com.notkamui.nesuka.core.AddressingMode.NoneAddressing
-import com.notkamui.nesuka.core.AddressingMode.ZeroPage
-import com.notkamui.nesuka.core.AddressingMode.ZeroPageX
-import com.notkamui.nesuka.core.AddressingMode.ZeroPageY
+import com.notkamui.nesuka.utils.AddressingMode.Absolute
+import com.notkamui.nesuka.utils.AddressingMode.AbsoluteX
+import com.notkamui.nesuka.utils.AddressingMode.AbsoluteY
+import com.notkamui.nesuka.utils.AddressingMode.Immediate
+import com.notkamui.nesuka.utils.AddressingMode.IndirectX
+import com.notkamui.nesuka.utils.AddressingMode.IndirectY
+import com.notkamui.nesuka.utils.AddressingMode.NoneAddressing
+import com.notkamui.nesuka.utils.AddressingMode.ZeroPage
+import com.notkamui.nesuka.utils.AddressingMode.ZeroPageX
+import com.notkamui.nesuka.utils.AddressingMode.ZeroPageY
 
 class OpCode(
     code: Int,
