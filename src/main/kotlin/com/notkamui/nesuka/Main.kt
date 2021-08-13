@@ -3,6 +3,7 @@ package com.notkamui.nesuka
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
+import javafx.scene.canvas.GraphicsContext
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import javafx.stage.Stage
@@ -10,7 +11,7 @@ import javafx.stage.Stage
 class Main : Application() {
     override fun start(stage: Stage) {
         val canvas = Canvas(320.0, 320.0)
-        val gc = canvas.graphicsContext2D
+        val gc: GraphicsContext = canvas.graphicsContext2D
         gc.pixelWriter.setColor(50, 50, Color.BLACK)
         val root = VBox(5.0, canvas)
         val scene = Scene(root)
