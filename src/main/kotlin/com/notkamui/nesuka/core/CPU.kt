@@ -668,18 +668,51 @@ class CPU : Memory {
             val opcode = OPCODES_MAP[code]
                 ?: throw IllegalStateException("OpCode $code is not recognized")
 
-            when (code) {
-                0xA9.u8, 0xA5.u8, 0xB5.u8, 0xAD.u8,
-                0xBD.u8, 0xB9.u8, 0xA1.u8, 0xB1.u8 ->
-                    lda(opcode.mode)
+            when (code.toInt()) {
+                0xA9, 0xA5, 0xB5, 0xAD, 0xBD, 0xB9, 0xA1, 0xB1 -> lda(opcode.mode)
 
-                0x85.u8, 0x95.u8, 0x8D.u8, 0x9D.u8,
-                0x99.u8, 0x81.u8, 0x91.u8 ->
-                    sta(opcode.mode)
+                0x85, 0x95, 0x8D, 0x9D, 0x99, 0x81, 0x91 -> sta(opcode.mode)
 
-                0xAA.u8 -> tax()
-                0xE8.u8 -> inx()
-                0x00.u8 -> return // brk
+                0xAA -> tax()
+
+                /*CLC*/0x18 -> removeFlag(CPUFlags.CARRY)
+                /*SEC*/0x38 -> insertFlag(CPUFlags.CARRY)
+                /*CLD*/0xD8 -> removeFlag(CPUFlags.DECIMAL_MODE)
+                /*SED*/0xF8 -> insertFlag(CPUFlags.DECIMAL_MODE)
+                /*CLI*/0x58 -> removeFlag(CPUFlags.INTERRUPT_DISABLE)
+                /*SEI*/0x78 -> insertFlag(CPUFlags.INTERRUPT_DISABLE)
+                /*CLV*/0xB8 -> removeFlag(CPUFlags.OVERFLOW)
+
+                /*PHA*/0x48 -> stackPush(registerA)
+                0x68 -> pla()
+                0x08 -> php()
+                0x28 -> plp()
+
+                0x69, 0x65, 0x75, 0x6D, 0x7D, 0x79, 0x61, 0x71 -> adc(opcode.mode)
+                0xE9, 0xE5, 0xF5, 0xED, 0xFD, 0xF9, 0xE1, 0xF1 -> sbc(opcode.mode)
+
+                0x29, 0x25, 0x35, 0x2D, 0x3D, 0x39, 0x21, 0x31 -> and(opcode.mode)
+                0x49, 0x45, 0x55, 0x4D, 0x5D, 0x59, 0x41, 0x51 -> eor(opcode.mode)
+                0x09, 0x05, 0x15, 0x0D, 0x1D, 0x19, 0x01, 0x11 -> ora(opcode.mode)
+
+                0x4A -> lsrAccumulator()
+                0x46, 0x56, 0x4E, 0x5E -> lsr(opcode.mode)
+                0x0A -> aslAccumulator()
+                0x06, 0x16, 0x0E, 0x1E -> asl(opcode.mode)
+                0x2A -> rolAccumulator()
+                0x26, 0x36, 0x2E, 0x3E -> rol(opcode.mode)
+                0x6A -> rorAccumulator()
+                0x66, 0x76, 0x6E, 0x7E -> ror(opcode.mode)
+
+                0xE6, 0xF6, 0xEE, 0xFE -> inc(opcode.mode)
+                0xC6, 0xD6, 0xCE, 0xDE -> dec(opcode.mode)
+                0xE8 -> inx()
+                0xCA -> dex()
+                0xC8 -> iny()
+                0x88 -> dey()
+
+
+                0x00 -> return // brk
                 else -> TODO()
             }
 
