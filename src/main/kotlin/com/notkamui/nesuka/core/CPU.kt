@@ -189,7 +189,7 @@ class CPU : Memory {
     /**
      * Resets the state of the CPU.
      */
-    private fun reset() {
+    fun reset() {
         registerA = 0.u8
         registerX = 0.u8
         registerY = 0.u8
@@ -202,7 +202,7 @@ class CPU : Memory {
     /**
      * Loads a [program] into memory.
      */
-    private fun load(program: List<UByte>) {
+    fun load(program: List<UByte>) {
         //memory = Array(0xFFFF) { 0.u8 }
         program.forEachIndexed { index, opcode ->
             memWrite((0x8000 + index).u16, opcode)
@@ -213,8 +213,10 @@ class CPU : Memory {
     /**
      * Runs a program loaded into the memory.
      */
-    private fun run() {
+    fun run(interrupter: CPU.() -> Unit = {}) {
         while (true) {
+            interrupter()
+
             val code = memRead(programCounter)
             programCounter++
             val programCounterState = programCounter
