@@ -2,41 +2,51 @@ package com.notkamui.nesuka
 
 import com.notkamui.nesuka.core.CPU
 import com.notkamui.nesuka.render.Bitmap
+import com.notkamui.nesuka.render.drawPixel
 import com.notkamui.nesuka.render.handleUserInput
+import com.notkamui.nesuka.render.readScreenState
 import com.notkamui.nesuka.utils.TEST_ROM_SNAKE
+import com.notkamui.nesuka.utils.u16
+import com.notkamui.nesuka.utils.u8
 import javafx.application.Application
 import javafx.scene.Group
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
+import javafx.scene.paint.Color
 import javafx.stage.Stage
+import kotlin.random.Random
+
+const val WINDOW_WIDTH = 32
+const val WINDOW_HEIGHT = 32
 
 class Main : Application() {
     override fun start(stage: Stage) {
         val window = Canvas(320.0, 320.0)
-        val gc: GraphicsContext = window.graphicsContext2D
         val root = Group(window)
         val scene = Scene(root)
+        scene.fill = Color.BLACK
         stage.title = "Nesuka"
         stage.scene = scene
-        stage.show()
 
-
-        val bitmap = Bitmap(32, 32)
         val cpu = CPU()
         handleUserInput(cpu, stage.scene)
         cpu.load(TEST_ROM_SNAKE)
         cpu.reset()
+
+        val bitmap = Bitmap(WINDOW_WIDTH, WINDOW_HEIGHT)
         cpu.run {
-            TODO(
-                """
-                read user input and write it to memory[0xFF]
-                update memory[0xFE] with new random number
-                read memory mapped screen state
-                render screen state
-            """.trimIndent()
-            )
+            val gc: GraphicsContext = window.graphicsContext2D
+            cpu.memWrite(0xFE.u16, Random.nextInt(1, 16).u8)
+            if (bitmap.readScreenState(cpu)) { // if change -> render
+                for (y in 0 until bitmap.height) for (x in 0 until bitmap.width) {
+                    gc.drawPixel(x, y, bitmap[x, y])
+                }
+            }
+            stage.show()
+            //runBlocking { delay(1000) }
         }
+        println("END")
     }
 }
 

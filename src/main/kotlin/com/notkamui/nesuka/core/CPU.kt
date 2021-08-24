@@ -39,7 +39,7 @@ private interface Memory {
     fun memReadShort(addr: UShort): UShort {
         val lo = memRead(addr).toUShort()
         val hi = memRead((addr + 1u).toUShort()).toUShort()
-        return ((hi shl 8) or lo.toInt()).toUShort()
+        return (hi shl 8 or lo.toInt()).toUShort()
     }
 
     /**
@@ -140,11 +140,11 @@ class CPU : Memory {
     fun stackPopShort(): UShort {
         val lo = stackPop().toUShort()
         val hi = stackPop().toUShort()
-        return ((hi shl 8) or lo.toInt()).u16
+        return (hi shl 8 or lo.toInt()).u16
     }
 
     fun stackPushShort(data: UShort) {
-        val hi = (data shl 8).toUByte()
+        val hi = (data shr 8).toUByte()
         val lo = (data and 0xFF.u16).toUByte()
         stackPush(hi)
         stackPush(lo)
@@ -205,9 +205,9 @@ class CPU : Memory {
     fun load(program: List<UByte>) {
         //memory = Array(0xFFFF) { 0.u8 }
         program.forEachIndexed { index, opcode ->
-            memWrite((0x8000 + index).u16, opcode)
+            memWrite((0x0600 + index).u16, opcode)
         }
-        memWriteShort(0xFFFC.u16, 0x8000.u16)
+        memWriteShort(0xFFFC.u16, 0x0600.u16)
     }
 
     /**
@@ -215,8 +215,6 @@ class CPU : Memory {
      */
     fun run(interrupter: CPU.() -> Unit = {}) {
         while (true) {
-            interrupter()
-
             val code = memRead(programCounter)
             programCounter++
             val programCounterState = programCounter
@@ -231,6 +229,8 @@ class CPU : Memory {
             if (programCounterState == programCounter) {
                 programCounter = (programCounter + (opcode.len - 1u).toUShort()).toUShort()
             }
+
+            interrupter()
         }
     }
 

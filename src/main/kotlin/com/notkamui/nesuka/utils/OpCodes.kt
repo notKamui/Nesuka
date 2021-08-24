@@ -640,7 +640,7 @@ class OpCode(
             }, //AddressingMode.Indirect with 6502 bug
 
             OpCode(0x20, "JSR", 3, 6) {
-                stackPushShort((programCounter + 2u - 1u).toUShort())
+                stackPushShort((programCounter + 1u).toUShort())
                 val targetAddr = memReadShort(programCounter)
                 programCounter = targetAddr
             },
