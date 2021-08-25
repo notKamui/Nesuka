@@ -178,7 +178,7 @@ private fun CPU.tya() {
 private fun CPU.sbc(mode: AddressingMode) {
     val addr = getOperandAddress(mode)
     val data = memRead(addr)
-    addToRegisterA((data.toByte() - 1).u8)
+    addToRegisterA((2 * Byte.MAX_VALUE + 1 - data.toByte()).toUByte())
 }
 
 /**
