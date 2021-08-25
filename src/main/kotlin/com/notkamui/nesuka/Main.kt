@@ -40,8 +40,8 @@ class Main : Application() {
         val bitmap = Bitmap(WINDOW_WIDTH, WINDOW_HEIGHT)
         stage.show()
 
-        val gameloop = Timeline()
-        gameloop.cycleCount = Timeline.INDEFINITE
+        val timeline = Timeline()
+        timeline.cycleCount = Timeline.INDEFINITE
         val call: CPU.() -> Unit = {
             val gc: GraphicsContext = window.graphicsContext2D
             memWrite(0xFE.u16, Random.nextInt(1, 16).u8)
@@ -50,11 +50,10 @@ class Main : Application() {
                     gc.drawPixel(x, y, bitmap[x, y])
                 }
             }
-            stage.show()
         }
         val kf = KeyFrame(Duration.millis(.088), { cpu.step(call) })
-        gameloop.keyFrames += kf
-        gameloop.play()
+        timeline.keyFrames += kf
+        timeline.play()
     }
 }
 
