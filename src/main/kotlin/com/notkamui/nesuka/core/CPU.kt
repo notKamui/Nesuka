@@ -214,24 +214,33 @@ class CPU : Memory {
      * Runs a program loaded into the memory.
      */
     fun run(interrupter: CPU.() -> Unit = {}) {
-        while (true) {
-            val code = memRead(programCounter)
-            programCounter++
-            val programCounterState = programCounter
-
-            val opcode = OPCODES_MAP[code]
-                ?: throw IllegalStateException("OpCode $code is not recognized")
-
-            if (code == 0x00.u8) return // BRK
-
-            opcode.action(this)
-
-            if (programCounterState == programCounter) {
-                programCounter = (programCounter + (opcode.len - 1u).toUShort()).toUShort()
-            }
-
-            interrupter()
+        while (step(interrupter)) { /**/
         }
+    }
+
+    /**
+     * Steps the CPU once.
+     * Returns false if it encounters BRK, true otherwise.
+     */
+    fun step(interrupter: CPU.() -> Unit = {}): Boolean {
+        val code = memRead(programCounter)
+        programCounter++
+        val programCounterState = programCounter
+
+        val opcode = OPCODES_MAP[code]
+            ?: throw IllegalStateException("OpCode $code is not recognized")
+
+        if (code == 0x00.u8) return false // BRK
+
+        opcode.action(this)
+
+        if (programCounterState == programCounter) {
+            programCounter = (programCounter + (opcode.len - 1u).toUShort()).toUShort()
+        }
+
+        interrupter()
+
+        return true
     }
 
     /**
