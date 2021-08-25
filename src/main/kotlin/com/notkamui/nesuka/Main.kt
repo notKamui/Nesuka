@@ -15,6 +15,8 @@ import javafx.scene.canvas.Canvas
 import javafx.scene.canvas.GraphicsContext
 import javafx.scene.paint.Color
 import javafx.stage.Stage
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlin.random.Random
 
 const val WINDOW_WIDTH = 32
@@ -35,6 +37,7 @@ class Main : Application() {
         cpu.reset()
 
         val bitmap = Bitmap(WINDOW_WIDTH, WINDOW_HEIGHT)
+        stage.show()
         cpu.run {
             val gc: GraphicsContext = window.graphicsContext2D
             cpu.memWrite(0xFE.u16, Random.nextInt(1, 16).u8)
@@ -44,7 +47,7 @@ class Main : Application() {
                 }
             }
             stage.show()
-            //runBlocking { delay(1000) }
+            runBlocking { delay(1000) }
         }
         println("END")
     }
