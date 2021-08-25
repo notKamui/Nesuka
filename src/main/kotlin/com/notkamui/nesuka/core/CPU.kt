@@ -39,7 +39,7 @@ private interface Memory {
     fun memReadShort(addr: UShort): UShort {
         val lo = memRead(addr).toUShort()
         val hi = memRead((addr + 1u).toUShort()).toUShort()
-        return ((hi shl 8) or lo.toInt()).toUShort()
+        return (hi shl 8 or lo.toInt()).toUShort()
     }
 
     /**
@@ -140,11 +140,11 @@ class CPU : Memory {
     fun stackPopShort(): UShort {
         val lo = stackPop().toUShort()
         val hi = stackPop().toUShort()
-        return ((hi shl 8) or lo.toInt()).u16
+        return (hi shl 8 or lo.toInt()).u16
     }
 
     fun stackPushShort(data: UShort) {
-        val hi = (data shl 8).toUByte()
+        val hi = (data shr 8).toUByte()
         val lo = (data and 0xFF.u16).toUByte()
         stackPush(hi)
         stackPush(lo)
@@ -189,7 +189,7 @@ class CPU : Memory {
     /**
      * Resets the state of the CPU.
      */
-    private fun reset() {
+    fun reset() {
         registerA = 0.u8
         registerX = 0.u8
         registerY = 0.u8
@@ -202,34 +202,45 @@ class CPU : Memory {
     /**
      * Loads a [program] into memory.
      */
-    private fun load(program: List<UByte>) {
+    fun load(program: List<UByte>) {
         //memory = Array(0xFFFF) { 0.u8 }
         program.forEachIndexed { index, opcode ->
-            memWrite((0x8000 + index).u16, opcode)
+            memWrite((0x0600 + index).u16, opcode)
         }
-        memWriteShort(0xFFFC.u16, 0x8000.u16)
+        memWriteShort(0xFFFC.u16, 0x0600.u16)
     }
 
     /**
      * Runs a program loaded into the memory.
      */
-    private fun run() {
-        while (true) {
-            val code = memRead(programCounter)
-            programCounter++
-            val programCounterState = programCounter
-
-            val opcode = OPCODES_MAP[code]
-                ?: throw IllegalStateException("OpCode $code is not recognized")
-
-            if (code == 0x00.u8) return // BRK
-
-            opcode.action(this)
-
-            if (programCounterState == programCounter) {
-                programCounter = (programCounter + (opcode.len - 1u).toUShort()).toUShort()
-            }
+    fun run(interrupter: CPU.() -> Unit = {}) {
+        while (step(interrupter)) { /**/
         }
+    }
+
+    /**
+     * Steps the CPU once.
+     * Returns false if it encounters BRK, true otherwise.
+     */
+    fun step(interrupter: CPU.() -> Unit = {}): Boolean {
+        val code = memRead(programCounter)
+        programCounter++
+        val programCounterState = programCounter
+
+        val opcode = OPCODES_MAP[code]
+            ?: throw IllegalStateException("OpCode $code is not recognized")
+
+        if (code == 0x00.u8) return false // BRK
+
+        opcode.action(this)
+
+        if (programCounterState == programCounter) {
+            programCounter = (programCounter + (opcode.len - 1u).toUShort()).toUShort()
+        }
+
+        interrupter()
+
+        return true
     }
 
     /**

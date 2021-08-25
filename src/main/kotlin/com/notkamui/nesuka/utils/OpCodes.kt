@@ -178,7 +178,7 @@ private fun CPU.tya() {
 private fun CPU.sbc(mode: AddressingMode) {
     val addr = getOperandAddress(mode)
     val data = memRead(addr)
-    addToRegisterA((data.toByte() - 1).u8)
+    addToRegisterA((2 * Byte.MAX_VALUE + 1 - data.toByte()).toUByte())
 }
 
 /**
@@ -640,7 +640,7 @@ class OpCode(
             }, //AddressingMode.Indirect with 6502 bug
 
             OpCode(0x20, "JSR", 3, 6) {
-                stackPushShort((programCounter + 2u - 1u).toUShort())
+                stackPushShort((programCounter + 1u).toUShort())
                 val targetAddr = memReadShort(programCounter)
                 programCounter = targetAddr
             },
