@@ -213,7 +213,7 @@ class CPU : Memory {
     /**
      * Runs a program loaded into the memory.
      */
-    fun run(interrupter: CPU.() -> Unit = {}) {
+    inline fun run(interrupter: CPU.() -> Unit = {}) {
         while (step(interrupter)) { /**/
         }
     }
@@ -222,7 +222,7 @@ class CPU : Memory {
      * Steps the CPU once.
      * Returns false if it encounters BRK, true otherwise.
      */
-    fun step(interrupter: CPU.() -> Unit = {}): Boolean {
+    inline fun step(interrupter: CPU.() -> Unit = {}): Boolean {
         val code = memRead(programCounter)
         programCounter++
         val programCounterState = programCounter
