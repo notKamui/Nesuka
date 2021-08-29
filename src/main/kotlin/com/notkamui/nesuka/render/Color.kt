@@ -1,5 +1,5 @@
 package com.notkamui.nesuka.render
-
+/*
 import com.notkamui.nesuka.utils.u8
 import javafx.scene.paint.Color
 
@@ -19,4 +19,4 @@ fun UByte.colorFromByte(): Color = when (toInt()) {
     6, 13 -> Color.MAGENTA
     7, 14 -> Color.YELLOW
     else -> Color.CYAN
-}
+}*/
