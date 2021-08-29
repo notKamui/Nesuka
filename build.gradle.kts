@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.notkamui.nesuka"
-version = "1.0-SNAPSHOT"
+version = "3.0"
 
 repositories {
     mavenCentral()
@@ -34,4 +34,9 @@ tasks.test {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<JavaCompile> {
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
 }
