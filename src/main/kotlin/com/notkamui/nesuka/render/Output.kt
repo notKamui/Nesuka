@@ -1,17 +1,17 @@
 package com.notkamui.nesuka.render
-/*
+
 import com.notkamui.nesuka.core.CPU
 import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
-import javafx.scene.canvas.GraphicsContext
-import javafx.scene.paint.Color
+import java.awt.Color
+import java.awt.Graphics
 
-fun GraphicsContext.drawPixel(x: Int, y: Int, color: Color) {
-    fill = color
-    fillRect(x * 10.0, y * 10.0, 10.0, 10.0)
+fun Graphics.drawPixel(x: Int, y: Int, color: Color) {
+    this.color = color
+    drawRect(x * 10, y * 10, 10, 10)
 }
 
-class Bitmap(val width: Int, val height: Int) {
+class Bitmap(private val width: Int, height: Int) {
     private val bitmap = Array(width * height * 3) { 0.u8 }
 
     operator fun get(frameIndex: Int) =
@@ -19,7 +19,7 @@ class Bitmap(val width: Int, val height: Int) {
 
     operator fun get(x: Int, y: Int): Color {
         val frameIndex = (y * width + x) * 3
-        return Color.rgb(
+        return Color(
             bitmap[frameIndex].toInt(),
             bitmap[frameIndex + 1].toInt(),
             bitmap[frameIndex + 2].toInt()
@@ -54,4 +54,4 @@ fun Bitmap.readScreenState(cpu: CPU): Boolean {
         frameIndex += 3
     }
     return update
-}*/
+}

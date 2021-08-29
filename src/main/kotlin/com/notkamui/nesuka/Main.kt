@@ -1,24 +1,27 @@
 package com.notkamui.nesuka
 
+import com.notkamui.nesuka.core.CPU
+import com.notkamui.nesuka.render.InputFeed
+import com.notkamui.nesuka.utils.TEST_ROM_SNAKE
 import java.awt.Color
-import java.awt.Graphics
 import javax.swing.JFrame
-import javax.swing.JPanel
-
-class Example : JPanel() {
-    override fun paint(g: Graphics) {
-        g.color = Color(0, 0, 0)
-        for (i in 0..99) for (j in 0..99)
-            g.drawLine(i, j, i, j)
-    }
-}
 
 fun main() {
+    val cpu = CPU()
+    cpu.load(TEST_ROM_SNAKE)
+    cpu.reset()
+
     JFrame("Nesuka").run {
         defaultCloseOperation = JFrame.EXIT_ON_CLOSE
-        contentPane.add(Example())
-        setSize(200, 200)
-        setLocation(350, 25)
+        addKeyListener(InputFeed(this, cpu))
+        setSize(320, 320)
+        isResizable = false
         isVisible = true
+
+        graphics.run {
+            color = Color.BLACK
+            for (i in 0..99) for (j in 0..99)
+                drawLine(i, j, i, j)
+        }
     }
 }
