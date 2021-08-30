@@ -19,7 +19,7 @@ dependencies {
 }
 
 tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
         attributes["Main-Class"] = "com.notkamui.nesuka.MainKt"
     }
