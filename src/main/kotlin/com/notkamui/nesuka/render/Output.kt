@@ -3,12 +3,31 @@ package com.notkamui.nesuka.render
 import com.notkamui.nesuka.core.CPU
 import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
-import javafx.scene.canvas.GraphicsContext
-import javafx.scene.paint.Color
+import java.awt.Color
+import java.awt.Graphics
+import java.awt.image.BufferStrategy
+import kotlin.random.Random
 
-fun GraphicsContext.drawPixel(x: Int, y: Int, color: Color) {
-    fill = color
-    fillRect(x * 10.0, y * 10.0, 10.0, 10.0)
+private const val WINDOW_WIDTH = 32
+private const val WINDOW_HEIGHT = 32
+
+class Renderer(private val bufferStrategy: BufferStrategy) {
+    private val bitmap = Bitmap(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    val render: CPU.() -> Unit = {
+        memWrite(0xFE.u16, Random.nextInt(1, 16).u8)
+        if (bitmap.readScreenState(this)) { // if change -> render
+            for (y in 0 until bitmap.height) for (x in 0 until bitmap.width) {
+                bufferStrategy.drawGraphics.drawPixel(x, y, bitmap[x, y])
+            }
+        }
+        bufferStrategy.show()
+    }
+}
+
+fun Graphics.drawPixel(x: Int, y: Int, color: Color) {
+    this.color = color
+    fillRect(x * 10, y * 10, 10, 10)
 }
 
 class Bitmap(val width: Int, val height: Int) {
@@ -19,7 +38,7 @@ class Bitmap(val width: Int, val height: Int) {
 
     operator fun get(x: Int, y: Int): Color {
         val frameIndex = (y * width + x) * 3
-        return Color.rgb(
+        return Color(
             bitmap[frameIndex].toInt(),
             bitmap[frameIndex + 1].toInt(),
             bitmap[frameIndex + 2].toInt()
