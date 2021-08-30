@@ -211,14 +211,6 @@ class CPU : Memory {
     }
 
     /**
-     * Runs a program loaded into the memory.
-     */
-    inline fun run(interrupter: CPU.() -> Unit = {}) {
-        while (step(interrupter)) { /**/
-        }
-    }
-
-    /**
      * Steps the CPU once.
      * Returns false if it encounters BRK, true otherwise.
      */
@@ -243,12 +235,10 @@ class CPU : Memory {
         return true
     }
 
-    /**
-     * Loads a [program] into memory and runs it.
-     */
     fun loadAndRun(program: List<UByte>) {
         load(program)
         reset()
-        run()
+        while (step()) {/**/
+        }
     }
 }

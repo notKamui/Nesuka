@@ -5,13 +5,32 @@ import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
 import java.awt.Color
 import java.awt.Graphics
+import java.awt.image.BufferStrategy
+import kotlin.random.Random
+
+private const val WINDOW_WIDTH = 32
+private const val WINDOW_HEIGHT = 32
+
+class Renderer(private val bufferStrategy: BufferStrategy) {
+    private val bitmap = Bitmap(WINDOW_WIDTH, WINDOW_HEIGHT)
+
+    val render: CPU.() -> Unit = {
+        memWrite(0xFE.u16, Random.nextInt(1, 16).u8)
+        if (bitmap.readScreenState(this)) { // if change -> render
+            for (y in 0 until bitmap.height) for (x in 0 until bitmap.width) {
+                bufferStrategy.drawGraphics.drawPixel(x, y, bitmap[x, y])
+            }
+        }
+        bufferStrategy.show()
+    }
+}
 
 fun Graphics.drawPixel(x: Int, y: Int, color: Color) {
     this.color = color
-    drawRect(x * 10, y * 10, 10, 10)
+    fillRect(x * 10, y * 10, 10, 10)
 }
 
-class Bitmap(private val width: Int, height: Int) {
+class Bitmap(val width: Int, val height: Int) {
     private val bitmap = Array(width * height * 3) { 0.u8 }
 
     operator fun get(frameIndex: Int) =
