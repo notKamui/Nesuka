@@ -65,7 +65,7 @@ class Application : Canvas(), Runnable {
         addKeyListener(GamepadListener(cpu))
         background = Color.BLACK
 
-        window.run {
+        with(window) {
             add(this@Application)
             pack()
             setLocationRelativeTo(null)

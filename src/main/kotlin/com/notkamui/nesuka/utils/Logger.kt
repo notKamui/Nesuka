@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter
 interface Logger {
     companion object {
         fun nowAsString(showMS: Boolean = true, timeSep: Char = ':'): String =
-            LocalDateTime.now().run {
+            with(LocalDateTime.now()) {
                 val fmt = DateTimeFormatter.ofPattern(
                     "dd-MM-yyyy_HH${timeSep}mm${timeSep}ss${
                         if (showMS) ".SS"
