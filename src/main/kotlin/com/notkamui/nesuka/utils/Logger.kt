@@ -28,8 +28,11 @@ class FileLogger : Logger {
             dir.mkdir()
         }
 
-        val file = File("logs", "${Logger.nowAsString(showMS = false, timeSep = '.')}-log.txt")
+        val date = Logger.nowAsString(showMS = false, timeSep = '.')
+
+        val file = File("logs", "$date-log.txt")
         file.createNewFile()
+        file.appendText("Nesuka - NES Emulator - Log $date\n")
         file
     }
 

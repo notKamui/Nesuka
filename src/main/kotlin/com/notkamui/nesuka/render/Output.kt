@@ -1,5 +1,6 @@
 package com.notkamui.nesuka.render
 
+import com.notkamui.nesuka.Global
 import com.notkamui.nesuka.core.CPU
 import com.notkamui.nesuka.utils.u16
 import com.notkamui.nesuka.utils.u8
@@ -22,6 +23,7 @@ class Renderer(private val bufferStrategy: BufferStrategy) {
             }
         }
         bufferStrategy.show()
+        Global.logger?.log("RENDERED")
     }
 }
 

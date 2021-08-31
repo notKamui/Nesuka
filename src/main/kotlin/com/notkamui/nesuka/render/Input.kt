@@ -18,9 +18,11 @@ class GamepadListener(private val cpu: CPU) : KeyAdapter() {
         }
     }
 
-    override fun keyTyped(event: KeyEvent) {/*nothing*/
+    override fun keyTyped(event: KeyEvent) {
+        /*nothing*/
     }
 
-    override fun keyReleased(event: KeyEvent) {/*nothing*/
+    override fun keyReleased(event: KeyEvent) {
+        /*nothing*/
     }
 }
