@@ -3,6 +3,8 @@ package com.notkamui.nesuka
 import com.notkamui.nesuka.core.CPU
 import com.notkamui.nesuka.render.GamepadListener
 import com.notkamui.nesuka.render.Renderer
+import com.notkamui.nesuka.utils.Logger
+import com.notkamui.nesuka.utils.PrintLogger
 import com.notkamui.nesuka.utils.TEST_ROM_SNAKE
 import java.awt.Canvas
 import java.awt.Color
@@ -12,6 +14,8 @@ import java.awt.Frame
 private const val TITLE = "Nesuka"
 private const val NANOS_PER_MILLISECOND = 1000000
 private const val NANOS_PER_FRAME = 16666666
+
+val logger: Logger = PrintLogger()
 
 class Application : Canvas(), Runnable {
     private val thread = Thread(this)
