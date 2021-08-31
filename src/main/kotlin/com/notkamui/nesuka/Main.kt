@@ -16,7 +16,9 @@ private const val TITLE = "Nesuka"
 private const val NANOS_PER_MILLISECOND = 1000000
 private const val NANOS_PER_FRAME = 16666666
 
-var logger: Logger? = null
+object Global {
+    var logger: Logger? = null
+}
 
 class Application : Canvas(), Runnable {
     private val thread = Thread(this)
@@ -78,7 +80,7 @@ class Application : Canvas(), Runnable {
 }
 
 fun main(args: Array<String>) {
-    logger = when (args.getOrNull(0)) {
+    Global.logger = when (args.getOrNull(0)) {
         "--print-log" -> PrintLogger()
         "--file-log" -> FileLogger()
         else -> null

@@ -1,5 +1,6 @@
 package com.notkamui.nesuka.core
 
+import com.notkamui.nesuka.Global
 import com.notkamui.nesuka.utils.AddressingMode
 import com.notkamui.nesuka.utils.AddressingMode.Absolute
 import com.notkamui.nesuka.utils.AddressingMode.AbsoluteX
@@ -62,8 +63,9 @@ class CPU : Memory {
     var status = CPUFlags.INTERRUPT_DISABLE or CPUFlags.BREAK_2
     override var memory = Array(0xFFFF) { 0.u8 }
 
-    override fun memRead(addr: UShort): UByte =
-        memory[addr.toInt()]
+    override fun memRead(addr: UShort): UByte {
+        return memory[addr.toInt()]
+    }
 
     override fun memWrite(addr: UShort, data: UByte) {
         memory[addr.toInt()] = data
@@ -216,11 +218,19 @@ class CPU : Memory {
      */
     inline fun step(interrupter: CPU.() -> Unit = {}): Boolean {
         val code = memRead(programCounter)
-        programCounter++
-        val programCounterState = programCounter
-
         val opcode = OPCODES_MAP[code]
             ?: throw IllegalStateException("OpCode $code is not recognized")
+
+        Global.logger?.log(
+            "0x${programCounter.toString(16).uppercase()} 0x${
+                opcode.code.toString(16).uppercase()
+            } ${opcode.mnemonic}\tA=0x${registerA.toString(16).uppercase()} X=0x${
+                registerX.toString(16).uppercase()
+            } Y=0x${registerY.toString(16).uppercase()} stack=$stackPointer status=0b${status.toString(2).uppercase()}"
+        )
+
+        programCounter++
+        val programCounterState = programCounter
 
         if (code == 0x00.u8) return false // BRK
 
@@ -238,7 +248,8 @@ class CPU : Memory {
     fun loadAndRun(program: List<UByte>) {
         load(program)
         reset()
-        while (step()) {/**/
+        while (step()) {
+            /*step*/
         }
     }
 }

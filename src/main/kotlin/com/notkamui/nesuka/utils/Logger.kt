@@ -34,12 +34,12 @@ class FileLogger : Logger {
     }
 
     override fun log(message: String) {
-        file.appendText("${Logger.nowAsString()}\t$message\n")
+        file.appendText("$message\n")
     }
 }
 
 class PrintLogger : Logger {
     override fun log(message: String) {
-        println("${Logger.nowAsString()}\t$message")
+        println(message)
     }
 }
