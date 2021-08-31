@@ -11,6 +11,9 @@ import java.awt.Canvas
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Frame
+import java.awt.event.WindowAdapter
+import java.awt.event.WindowEvent
+import kotlin.system.exitProcess
 
 private const val TITLE = "Nesuka"
 private const val NANOS_PER_MILLISECOND = 1000000
@@ -69,6 +72,11 @@ class Application : Canvas(), Runnable {
             isResizable = false
             isVisible = true
             addKeyListener(GamepadListener(cpu))
+            addWindowListener(object : WindowAdapter() {
+                override fun windowClosing(e: WindowEvent?) {
+                    exitProcess(0)
+                }
+            })
         }
     }
 
